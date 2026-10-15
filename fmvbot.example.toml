@@ -1,0 +1,63 @@
+# Copy to fmvbot.toml and change what you like; anything left out uses the default shown here.
+
+# Jobs in priority order. Remove a name to turn that job off.
+tasks = [
+  "tutorial",       # follow the onboarding for new farms
+  "popups",         # claim rewards, dismiss everything else (never buys anything)
+  "collect",        # produce, tickets, supply crates on the board
+  "harvest",        # grown crops and animals (ingredients that orders need first)
+  "clear_depleted", # remove crops/animals with no harvests left
+  "orders",         # start orders, use free skips, claim coins
+  "workers",        # trees, rocks, toolboxes (spends energy)
+  "chests",         # open reward chests with keys, upgrade 5 keys -> 2
+  "repair",         # fix broken buildings once the materials are on the board
+  "land",           # bank exactly the coins needed and buy the next plot
+  "rewards",        # discovery book gems, free marketplace gifts, daily challenge
+  "visits",         # spend train tickets visiting farms (Discord/Facebook only)
+  "cards",          # use upgrade cards
+  "merge",          # merging (5 at a time when possible)
+  "crates",         # open supply crates while there is room
+  "tidy",           # bank cheap coins/gems when the board is jammed
+]
+
+# Board space
+reserve_free_cells = 5       # stop opening crates at this many empty cells
+min_free_cells = 3           # below this, bank low-value coins and gems
+crate_burst = 6              # crates opened in one go
+
+# Merging
+prefer_merge5 = true         # 5 identical items make 2; wait for 5 when there is room
+merge3_when_free_below = 6   # merge in 3s when the board is this full
+merge3_always = ["wood", "stone", "tool"]
+merge5_only = ["coin", "gem", "energy"]   # merging 3 of these gains nothing
+never_merge = []
+max_moves_per_merge = 6
+
+# Currency items on the board
+collect_coins_at_tier = 8    # coins merged by 5s are worth more; bank them at this tier
+collect_gems_at_tier = 6
+keep_energy_items = true     # keep energy items as a reserve, use them when energy is low
+energy_low = 10
+
+# Land is bought with coins only. Gems and real money are never spent.
+unlock_land = true
+land_coin_reserve = 0
+
+# Workers
+use_energy_on = ["toolbox", "tree", "rock"]   # order = priority
+energy_reserve = 0
+
+# Free marketplace gifts on web builds start a video ad; Discord has no ads
+watch_ads = false
+
+visit_friends = true
+
+# Pacing
+speed = 1.0                  # >1 faster, <1 slower
+idle_poll = 20.0             # seconds between checks when there is nothing to do
+max_actions_per_minute = 90
+break_every_minutes = 0      # 0 = no breaks
+break_minutes = 3
+
+headless = false
+screenshots_on_error = true
