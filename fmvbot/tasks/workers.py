@@ -16,9 +16,17 @@ def stage_cost(it: Item) -> float:
 
 
 class WorkersTask(Task):
-    """Trees, rocks and toolboxes: send workers (costs energy), collect what they drop."""
+    """Trees, rocks and toolboxes: send workers (costs energy), collect what they drop.
+
+    Each worker takes one job per round (like orders), so skipping jobs with gems doesn't turn
+    into an endless loop that keeps the bot away from orders, coins and crates."""
 
     name = "workers"
+
+    def __init__(self, bot):
+        super().__init__(bot)
+        self.round = -1
+        self.sent = 0
 
     def sources(self, snap: Snapshot) -> list[Item]:
         return [it for it in snap.items if it.has("mapSource") and not self.bot.blocked(f"source:{it.cell}")]
@@ -82,8 +90,11 @@ class WorkersTask(Task):
                     self.bot.block(f"skip:{it.cell}", 60)
                 return True
 
+        if self.round != self.bot.round:
+            self.round = self.bot.round
+            self.sent = 0
         free_workers = snap.workers.get("free") or 0
-        if free_workers <= 0:
+        if free_workers <= 0 or self.sent >= (snap.workers.get("total") or 1):
             return False
         idle = [
             it
@@ -111,4 +122,5 @@ class WorkersTask(Task):
             self.bot.failed(key, limit=2, seconds=600)
         else:
             self.bot.stats["workers sent"] += 1
+            self.sent += 1
         return True

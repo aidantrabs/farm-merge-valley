@@ -7,13 +7,14 @@ from pathlib import Path
 
 @dataclass
 class Config:
-    # which jobs the bot does, in priority order (remove names to disable them).
-    # merge and crates always find work, so everything occasional goes before them.
+    # which jobs the bot does, in priority order (remove names to disable them): merge everything on
+    # the board first, then orders and the rest, then coins, then open crates, and round again
     tasks: list[str] = field(
         default_factory=lambda: [
             "stickers",
             "tutorial",
             "popups",
+            "merge",
             "collect",
             "harvest",
             "clear_depleted",
@@ -25,7 +26,7 @@ class Config:
             "rewards",
             "visits",
             "cards",
-            "merge",
+            "merge_coins",
             "crates",
             "tidy",
         ]

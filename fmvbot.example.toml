@@ -1,10 +1,12 @@
 # Copy to fmvbot.toml and change what you like; anything left out uses the default shown here.
 
-# Jobs in priority order. Remove a name to turn that job off.
+# Jobs in priority order. Remove a name to turn that job off. Everything on the board gets merged
+# first, then orders and the rest, then coins, then crates are opened, and round again.
 tasks = [
   "stickers",       # sticker book: skip pack reveals, collect, close it (it covers everything)
   "tutorial",       # follow the onboarding for new farms
   "popups",         # claim rewards, dismiss everything else (never buys anything)
+  "merge",          # merge everything on the board except coins (swaps items around, no free cells needed)
   "collect",        # produce, tickets, supply crates on the board
   "harvest",        # grown crops and animals (ingredients that orders need first)
   "clear_depleted", # remove crops/animals with no harvests left
@@ -16,7 +18,7 @@ tasks = [
   "rewards",        # discovery book gems, free marketplace gifts, daily challenge
   "visits",         # spend train tickets visiting farms (Discord/Facebook only)
   "cards",          # use upgrade cards
-  "merge",          # merging (5 at a time when possible)
+  "merge_coins",    # merge coins
   "crates",         # open supply crates while there is room
   "tidy",           # bank cheap coins (and gems, if collected) when the board is jammed
 ]

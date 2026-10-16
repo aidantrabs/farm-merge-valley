@@ -35,6 +35,8 @@ class Bot:
         self._started = time.monotonic()
         self._last_report = 0.0
         self._next_break = self._started + cfg.break_every_minutes * 60 if cfg.break_every_minutes else None
+        # bumped each time the loop gets down to the crates; orders do one round per building
+        self.round = 0
         self.tasks = build_tasks(self, cfg.tasks)
 
     # ------------------------------------------------------------ lifecycle
@@ -98,6 +100,8 @@ class Bot:
             # the sticker book covers everything; nothing else can be pressed until it's gone
             tasks = [t for t in self.tasks if t.name == "stickers"]
         for task in tasks:
+            if task.name == "crates":
+                self.round += 1
             if self.blocked(f"task:{task.name}"):
                 continue
             try:
@@ -114,6 +118,8 @@ class Bot:
                 self.block(f"task:{task.name}", 60)
                 await self._screenshot(f"error-{task.name}")
                 return True
+        if not any(t.name == "crates" for t in tasks):
+            self.round += 1
         return False
 
     async def idle(self, snap: Snapshot):

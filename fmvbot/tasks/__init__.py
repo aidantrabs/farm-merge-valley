@@ -97,7 +97,7 @@ class Task:
 def build_tasks(bot, names: list[str]) -> list[Task]:
     from .board import ClearDepletedTask, CollectTask, CratesTask, HarvestTask, TidyTask
     from .chests import ChestsTask
-    from .merging import MergeTask
+    from .merging import MergeCoinsTask, MergeTask
     from .orders import OrdersTask
     from .popups import PopupTask
     from .progress import CardsTask, LandTask, RepairTask
@@ -119,6 +119,7 @@ def build_tasks(bot, names: list[str]) -> list[Task]:
             WorkersTask,
             ChestsTask,
             MergeTask,
+            MergeCoinsTask,
             CratesTask,
             RepairTask,
             LandTask,

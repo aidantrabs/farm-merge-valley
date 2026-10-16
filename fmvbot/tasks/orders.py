@@ -22,9 +22,17 @@ def missing_ingredients(bot, snap: Snapshot) -> dict[str, int]:
 
 class OrdersTask(Task):
     """Production buildings: start orders when the ingredients are in, skip timers (free, or with gems
-    when allowed), claim the coins."""
+    when allowed), claim the coins.
+
+    Each building gets one order per round, so instant gem skips can't keep the bot on orders
+    forever: coins get merged and crates opened before the next round starts."""
 
     name = "orders"
+
+    def __init__(self, bot):
+        super().__init__(bot)
+        self.round = -1
+        self.served: set[str] = set()
 
     def affordable(self, recipe_id: str, snap: Snapshot) -> bool:
         r = self.bot.recipes.get(recipe_id) or {}
@@ -33,6 +41,9 @@ class OrdersTask(Task):
     async def step(self, snap) -> bool:
         if snap.tutorial.get("track") or snap.popups:
             return False
+        if self.round != self.bot.round:
+            self.round = self.bot.round
+            self.served.clear()
         sites = {}
         for it in snap.items:
             b = self.bp.comp(it.id, "building")
@@ -43,6 +54,8 @@ class OrdersTask(Task):
             it = sites.get(bid)
             info = snap.buildings.get(bid, {})
             if it is None or not info.get("active", True) or info.get("upgrading") or self.bot.blocked(f"orders:{bid}"):
+                continue
+            if bid in self.served:
                 continue
             if o["state"] == DONE:
                 if len(snap.empty) < len((self.bot.recipes.get(o["recipe"]) or {}).get("reward") or [1]):
@@ -115,6 +128,7 @@ class OrdersTask(Task):
             self.bot.failed(key, limit=2, seconds=300)
         else:
             self.bot.stats["orders made"] += 1
+            self.served.add(bid)
             # short recipes can be skipped for free right away (or for gems, when allowed)
             b = self.skip_button(await self.bot.stable_popup())
             if b is not None:

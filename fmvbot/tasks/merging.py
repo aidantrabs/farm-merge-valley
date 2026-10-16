@@ -11,7 +11,10 @@ NEVER = ("reward_crate",)
 
 
 class MergeTask(Task):
+    """Merge whatever is on the board. Coins have their own turn (merge_coins), after orders."""
+
     name = "merge"
+    coins = False
 
     def _matches(self, item_id: str, names: list[str]) -> bool:
         graph = self.bp.graph(item_id)
@@ -32,7 +35,7 @@ class MergeTask(Task):
         for it in snap.items:
             if it.movable and it.has("displaceable") and not it.busy and it.ext == (1, 1) and self.bot.reachable(it.cell):
                 pushable.add(it.cell)
-            if not self.bp.mergeable(it.id):
+            if not self.bp.mergeable(it.id) or it.has("coin") != self.coins:
                 continue
             key = it.merge_key
             ids[key] = it.id
@@ -115,3 +118,8 @@ class MergeTask(Task):
             await asyncio.sleep(0.15)
         bot.succeeded(key)
         bot.stats["merges"] += 1
+
+
+class MergeCoinsTask(MergeTask):
+    name = "merge_coins"
+    coins = True

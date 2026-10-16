@@ -16,11 +16,11 @@ keeps working in the background while you use your computer.
 
 | Job | Details |
 | --- | --- |
-| Merging | Plans whole merges: gathers 5 identical items into one group (5 make 2, 3 only make 1), swapping other items out of the way (so a full board still works), never lets an extra copy join by accident, prefers short drags. Falls back to 3s when the board is full. Coins, gems and energy only ever merge in 5s (3s gain nothing). Upgrade cards only merge with cards for the same crop or animal. |
+| Merging | Comes first: everything on the board that can merge is merged before orders, coins after orders. Plans whole merges: gathers 5 identical items into one group (5 make 2, 3 only make 1), swapping other items out of the way (so a full board still works), never lets an extra copy join by accident, prefers short drags. Falls back to 3s when the board is full. Coins, gems and energy only ever merge in 5s (3s gain nothing). Upgrade cards only merge with cards for the same crop or animal. |
 | Supply crates | Opens crates while keeping room on the board for harvests and loot; opens more when the crate counter is capped so regeneration isn't wasted. |
 | Harvesting | Taps grown crops and animals when they're ready, ingredients that open orders are waiting for first, then picks up the produce. Clears depleted plants and animals. With `spend_gems` on, skips the regrowth of crops and animals an open order is waiting for. |
-| Orders | Starts each building's order once the ingredients are in, takes the free skip on short timers (or skips any timer with gems when `spend_gems` is on), claims the coins. |
-| Workers | Sends workers to toolboxes, trees and rocks (toolboxes first, then whatever pending repairs need, cheapest step first), uses free skips (gem skips with `spend_gems`), collects the wood, stone and tools. |
+| Orders | Starts each building's order once the ingredients are in, takes the free skip on short timers (or skips any timer with gems when `spend_gems` is on), claims the coins. One order per building per round: merge everything, orders, coins, crates, repeat. |
+| Workers | Sends workers to toolboxes, trees and rocks (toolboxes first, then whatever pending repairs need, cheapest step first), uses free skips (gem skips with `spend_gems`), collects the wood, stone and tools. One job per worker per round. |
 | Repairs | Discovers broken buildings and repairs them as soon as the materials are on the board. Those materials are reserved so they don't get merged away. |
 | Land | Banks exactly the coins needed for the cheapest plot and buys it. |
 | Reward chests | Opens chests when you have the keys and room for everything inside (making room if needed). Turns 5 keys into 2 of the next tier only when a better chest is waiting for them. |
