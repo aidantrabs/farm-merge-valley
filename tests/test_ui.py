@@ -56,3 +56,9 @@ def test_land_buy_bubble_is_not_premium_but_popup_buy_is_a_cost():
     land = btn("purchaseArea", "Buy", ["btn_default_green_idle"])
     assert not ui.spends_premium(land)
     assert ui.costs_something(land)
+
+
+def test_close_button_is_the_x_not_the_panel_holding_it():
+    panel = {**btn("content", "Fast Forward Event", ["popup_background_event_9slice", "btn_close_big_idle"]), "w": 250}
+    x = {**btn("close", "", ["btn_close_big_idle", "btn_close_big_down"]), "w": 21}
+    assert ui.close_button([panel, x]) is x

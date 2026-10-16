@@ -321,11 +321,12 @@
 
   let popupSeq = 0;
 
-  // the popup layer also hosts stray sprites (e.g. the tutorial hand); real popups are named scenes
+  // the popup layer also hosts stray sprites (e.g. the tutorial hand) and toasts (quest progress
+  // banners that slide in and fade out by themselves, can't be pressed or closed); real popups are named scenes
   function popups(G) {
     const layer = tryOr(() => A.g.navigation.popupLayer.container, null);
     if (!layer) return [];
-    return layer.children.filter((p) => p.visible && (p._name || p.onClosed)).map((p) => ({
+    return layer.children.filter((p) => p.visible && (p._name || p.onClosed) && !('_toastState' in p)).map((p) => ({
       id: p.__fmvId || (p.__fmvId = ++popupSeq),
       name: p._name || p.name || p.constructor.name,
       locked: !!p._popupLocked,

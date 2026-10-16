@@ -79,6 +79,11 @@ def is_negative(b: dict) -> bool:
     return bool(NEGATIVE.search(b.get("text") or "")) or is_close(b)
 
 
+def close_button(buttons: list[dict]) -> dict | None:
+    """The X itself: containers that hold one look like close buttons too, but they're bigger."""
+    return min((b for b in buttons if is_close(b)), key=lambda b: b["w"] * b["h"], default=None)
+
+
 def biggest(buttons: list[dict]) -> dict | None:
     return max(buttons, key=lambda b: b["w"] * b["h"], default=None)
 

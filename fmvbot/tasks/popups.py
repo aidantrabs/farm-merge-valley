@@ -65,7 +65,7 @@ class PopupTask(Task):
             await asyncio.sleep(0.8)
             return True
 
-        target, why = self._choose(p, buttons, view, outside_ok=n == 1)
+        target, why = self._choose(p, buttons, snap, outside_ok=n == 1)
         if target is None:
             if p["locked"]:
                 # a popup that can't be dismissed is waiting for something else (often the tutorial)
@@ -82,9 +82,25 @@ class PopupTask(Task):
         )
         return True
 
-    def _choose(self, p, buttons, view, outside_ok: bool):
-        cy = view["t"] + view["h"] / 2
-        outside = ((view["l"] + 12, cy), "tap outside") if outside_ok and not p["locked"] else (None, "nothing left to try")
+    @staticmethod
+    def _outside(buttons, snap):
+        """A spot off the popup that isn't a HUD button either: popups that don't dim the screen
+        let taps through, and the edges of the screen are where the HUD buttons live."""
+        v = snap.view
+        cx, cy = v["l"] + v["w"] / 2, v["t"] + v["h"] / 2
+        spots = [(v["l"] + 12, cy), (v["l"] + v["w"] - 12, cy), (cx, v["t"] + v["h"] - 12), (cx, v["t"] + 12)]
+        boxes = [(b["x"], b["y"], b["w"] / 2 + 6, b["h"] / 2 + 6) for b in buttons] + [
+            ((x0 + x1) / 2, (y0 + y1) / 2, (x1 - x0) / 2 + 6, (y1 - y0) / 2 + 6) for x0, y0, x1, y1 in snap.hud_rects()
+        ]
+        for x, y in spots:
+            if not any(abs(x - bx) <= hw and abs(y - by) <= hh for bx, by, hw, hh in boxes):
+                return x, y
+        return None
+
+    def _choose(self, p, buttons, snap, outside_ok: bool):
+        view = snap.view
+        spot = self._outside(buttons, snap) if outside_ok and not p["locked"] else None
+        outside = (spot, "tap outside") if spot else (None, "nothing left to try")
         if p["tapToContinue"]:
             # tap somewhere that isn't a button (offers like "x2 for gems" sit right under the text)
             spots = [(0.5, 0.6), (0.5, 0.9), (0.12, 0.5), (0.88, 0.5), (0.5, 0.12)]
@@ -94,12 +110,12 @@ class PopupTask(Task):
                     return (x, y), "tap to continue"
             return None, "nowhere safe to tap"
         if SHOP.search(p["name"]):
-            b = next((b for b in buttons if ui.is_close(b)), None) or next((b for b in buttons if ui.is_negative(b)), None)
+            b = ui.close_button(buttons) or next((b for b in buttons if ui.is_negative(b)), None)
             return (b, "dismiss shop") if b else outside
         good = [b for b in buttons if ui.is_positive(b)]
         if good:
             return ui.biggest(good), "positive"
-        b = next((b for b in buttons if ui.is_close(b)), None)
+        b = ui.close_button(buttons)
         if b and not p["locked"]:
             return b, "close"
         safe = [b for b in buttons if not ui.costs_something(b)]
