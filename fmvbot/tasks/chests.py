@@ -44,7 +44,7 @@ class ChestsTask(Task):
         cash = [
             it
             for it in snap.items
-            if it.has("coin", "gem")
+            if (it.has("coin") or (it.has("gem") and self.cfg.collect_gems_at_tier))
             and it.has("collectable")
             and not self.bot.blocked(f"collect:{it.cell}")
             and self.bot.reachable(it.cell)

@@ -18,12 +18,12 @@ tasks = [
   "cards",          # use upgrade cards
   "merge",          # merging (5 at a time when possible)
   "crates",         # open supply crates while there is room
-  "tidy",           # bank cheap coins/gems when the board is jammed
+  "tidy",           # bank cheap coins (and gems, if collected) when the board is jammed
 ]
 
 # Board space
 reserve_free_cells = 5       # stop opening crates at this many empty cells
-min_free_cells = 3           # below this, bank low-value coins and gems
+min_free_cells = 3           # below this, bank low-value coins to make room
 crate_burst = 6              # crates opened in one go
 
 # Merging
@@ -36,7 +36,7 @@ max_moves_per_merge = 6
 
 # Currency items on the board
 collect_coins_at_tier = 8    # coins merged by 5s are worth more; bank them at this tier
-collect_gems_at_tier = 6
+collect_gems_at_tier = 0     # 0 = never pick up gem items, only merge them
 keep_energy_items = true     # keep energy items as a reserve, use them when energy is low
 energy_low = 10
 

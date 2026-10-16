@@ -33,7 +33,7 @@ class Config:
 
     # board space
     reserve_free_cells: int = 5  # keep this many empty cells after opening crates (room for harvests and loot)
-    min_free_cells: int = 3  # below this, bank low-value coins and gems to make room
+    min_free_cells: int = 3  # below this, bank low-value coins to make room
     crate_burst: int = 6  # crates opened per turn before re-planning merges
 
     # merging
@@ -46,7 +46,7 @@ class Config:
 
     # currencies lying on the board
     collect_coins_at_tier: int = 8  # bank coin items once they reach this tier
-    collect_gems_at_tier: int = 6
+    collect_gems_at_tier: int = 0  # 0 = never pick up gem items, only merge them
     keep_energy_items: bool = True  # use energy items only when energy runs low
     energy_low: int = 10
 

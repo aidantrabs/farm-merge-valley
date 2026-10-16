@@ -33,6 +33,7 @@ keeps working in the background while you use your computer.
 Safety rails:
 
 - Never spends gems or real money. Buttons that cost gems, show a price, or start an ad are never pressed.
+- Gem items lying on the board are only ever merged, never picked up (`collect_gems_at_tier = 0`).
 - Never clicks outside the game itself, so Discord or the website around it are safe.
 - Never presses sign-in, invite or share buttons.
 - Doesn't change game data: everything happens through clicks and drags. The only thing it adjusts

@@ -39,6 +39,8 @@ class CollectTask(Task):
                 return "coins"
             return None
         if it.has("gem"):
+            if not self.cfg.collect_gems_at_tier:
+                return None
             if self.bp.next(it.id) is None or self.bp.tier(it.id) >= self.cfg.collect_gems_at_tier:
                 return "gems"
             return None
@@ -179,7 +181,7 @@ class TidyTask(Task):
             it
             for it in snap.items
             if it.has("collectable")
-            and it.has("coin", "gem", "energy")
+            and (it.has("coin", "energy") or (it.has("gem") and self.cfg.collect_gems_at_tier))
             and not self.bot.blocked(f"collect:{it.cell}")
             and self.bot.reachable(it.cell)
         ]

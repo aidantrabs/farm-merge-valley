@@ -1,9 +1,33 @@
 import asyncio
 from collections import Counter
+from types import SimpleNamespace
 
 from fmvbot.config import Config
 from fmvbot.game import Snapshot
+from fmvbot.tasks.board import CollectTask, TidyTask
 from fmvbot.tasks.stickers import StickersTask
+
+
+def bot(**cfg):
+    return SimpleNamespace(cfg=Config(**cfg), bp=SimpleNamespace(next=lambda i: None, tier=lambda i: 6), blocked=lambda k: False)
+
+
+def snap(gems=1000, items=()):
+    return Snapshot({"ok": True, "inv": {"gems": gems}, "cells": list(items)})
+
+
+def item(id, behaviors, c=1, r=1):
+    return {"id": id, "c": c, "r": r, "x": 0, "y": 0, "b": behaviors}
+
+
+def test_gem_items_on_the_board_are_only_merged_by_default():
+    gem = item("gem_6", ["gem", "collectable", "mergeable"])
+    s = snap(items=[gem])
+    assert CollectTask(bot()).reason(s.items[0], s) is None
+    assert CollectTask(bot(collect_gems_at_tier=6)).reason(s.items[0], s) == "gems"
+    b = bot()
+    b.reachable = lambda cell: True
+    assert TidyTask(b).candidates(s) == []
 
 
 class FakeBot:
