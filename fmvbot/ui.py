@@ -47,6 +47,30 @@ def spends_premium(b: dict) -> bool:
     )
 
 
+GEM_TEX = re.compile(r"(gem|diamond)", re.I)
+NOT_GEMS_TEX = re.compile(r"(video|_ad_|ads_|cash|dollar)", re.I)
+# gem prices are whole numbers; real money shows a currency or cents ("CA$9.99")
+MONEY_TEXT = re.compile(r"[$€£¥₹]|\d[.,]\d\d\b")
+# buying gems themselves (or premium) is always real money, whatever icon the button shows
+MONEY_GOODS = re.compile(r"(^purchaseIAP|^purchasePremium|^iap|gems_)", re.I)
+
+
+def gem_price(b: dict) -> int | None:
+    """Gems a button costs, or None when it isn't paid for with gems (free, real money, ads)."""
+    tex = " ".join(b.get("tex") or [])
+    text = b.get("text") or ""
+    name = b.get("name") or ""
+    if not GEM_TEX.search(tex) or NOT_GEMS_TEX.search(tex) or MONEY_GOODS.search(name) or AD_TEXT.search(text):
+        return None
+    if MONEY_TEXT.search(text):
+        return None
+    m = re.search(r"(\d[\d,]*(?:\.\d+)?)\s*([kK])?", text)
+    if not m:
+        return None
+    n = float(m.group(1).replace(",", ""))
+    return int(n * 1000 if m.group(2) else n)
+
+
 def costs_something(b: dict) -> bool:
     """Buttons that show a price, a gem, or start an ad."""
     tex = " ".join(b.get("tex") or [])

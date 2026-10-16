@@ -89,9 +89,9 @@ class HarvestTask(Task):
             and _hp(it) > 0
             and not self.bot.blocked(f"harvest:{it.cell}")
         ]
-        if not ready:
-            return False
         wanted = missing_ingredients(self.bot, snap)
+        if not ready:
+            return await self.speed_up(snap, wanted)
         it = min(ready, key=lambda i: self.bp.produce(i.id) not in wanted)
         log.info("harvest %s at %s", it.id, it.cell)
         before = len(snap.items)
@@ -105,6 +105,26 @@ class HarvestTask(Task):
             self.bot.failed(f"harvest:{it.cell}", seconds=600)
         else:
             self.bot.stats["harvests"] += 1
+        return True
+
+    async def speed_up(self, snap, wanted: dict[str, int]) -> bool:
+        """Skip a crop or animal's regrowth with gems, but only when an open order is waiting for what it makes."""
+        if not self.cfg.spend_gems:
+            return False
+        cooling = [
+            it
+            for it in snap.items
+            if it.has("harvestable")
+            and it.busy
+            and not (it.harvest or {}).get("depleted")
+            and self.bp.produce(it.id) in wanted
+            and not self.bot.blocked(f"skip:{it.cell}")
+        ]
+        if not cooling:
+            return False
+        it = min(cooling, key=lambda i: i.timer_left())
+        if not await self.skip_cooldown(it, f"{it.id} regrowth"):
+            self.bot.block(f"skip:{it.cell}", 300)
         return True
 
 

@@ -50,7 +50,12 @@ class Config:
     keep_energy_items: bool = True  # use energy items only when energy runs low
     energy_low: int = 10
 
-    # land (bought with coins only; gems and real money are never spent)
+    # gems from the inventory (never real money) can skip timers; off unless turned on
+    spend_gems: bool = False
+    gem_reserve: int = 0  # never go below this many gems
+    max_gems_per_skip: int = 0  # 0 = no limit
+
+    # land (bought with coins only)
     unlock_land: bool = True
     land_coin_reserve: int = 0
 

@@ -1,6 +1,5 @@
 import math
 
-from .. import ui
 from ..game import Item, Snapshot
 from . import Task, log
 
@@ -73,10 +72,15 @@ class WorkersTask(Task):
                     self.bot.block("skip:map", 60)
                 return True
 
-        # a job about to finish can be skipped for free
+        # a job about to finish can be skipped for free, any other one for gems when that's allowed
         for it in sources:
-            if it.busy and 0 < it.timer_left() <= FREE_SKIP_S and not self.bot.blocked(f"skip:{it.cell}"):
-                return await self.free_skip(it)
+            left = it.timer_left()
+            if it.busy and 0 < left and (left <= FREE_SKIP_S or self.cfg.spend_gems) and not self.bot.blocked(f"skip:{it.cell}"):
+                if await self.skip_cooldown(it, it.id):
+                    await self.bot.wait_for(lambda s: s.grid.get(it.cell) is None or not s.grid[it.cell].busy, 2)
+                else:
+                    self.bot.block(f"skip:{it.cell}", 60)
+                return True
 
         free_workers = snap.workers.get("free") or 0
         if free_workers <= 0:
@@ -107,16 +111,4 @@ class WorkersTask(Task):
             self.bot.failed(key, limit=2, seconds=600)
         else:
             self.bot.stats["workers sent"] += 1
-        return True
-
-    async def free_skip(self, it: Item) -> bool:
-        await self.bot.tap_cell(it.cell)
-        snap = await self.bot.wait_for(lambda s: any(ui.is_free(b) for p in s.popouts for b in p["ui"]), 1.5)
-        if snap is None:
-            self.bot.block(f"skip:{it.cell}", 60)
-            return True
-        b = next(b for p in snap.popouts for b in p["ui"] if ui.is_free(b))
-        log.info("free skip on %s", it.id)
-        await self.bot.tap_xy(b["x"], b["y"])
-        await self.bot.wait_for(lambda s: s.grid.get(it.cell) is None or not s.grid[it.cell].busy, 2)
         return True

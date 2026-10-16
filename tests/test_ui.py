@@ -58,6 +58,19 @@ def test_land_buy_bubble_is_not_premium_but_popup_buy_is_a_cost():
     assert ui.costs_something(land)
 
 
+def test_gem_price_only_for_plain_gem_costs():
+    assert ui.gem_price(btn("orderFastForward", "15", ["icon_btn_orders_fastforward_gem"])) == 15
+    assert ui.gem_price(btn("skip", "1,250", ["btn_default_green_idle", "icon_btn_gem"])) == 1250
+    assert ui.gem_price(btn("skip", "1.2K", ["icon_btn_gem"])) == 1200
+    assert ui.gem_price(btn("orderFastForward", "FREE")) is None
+    assert ui.gem_price(btn("purchaseIAP-gems_small", "$ 9.99", ["icon_btn_gem"])) is None
+    assert ui.gem_price(btn("orderFastForward", "15", ["icon_btn_video_white", "icon_btn_gem"])) is None
+    assert ui.gem_price(btn("remove", "Remove 5", ["icon_energy"])) is None
+    assert ui.gem_price(btn("purchaseInventory-crates_30", "20", ["btn_marketplace_green_idle", "icon_btn_gem"])) == 20
+    assert ui.gem_price(btn("purchaseInventory-gems_3500", "CA$29.99 CA$39.99", ["icon_btn_gem"])) is None
+    assert ui.gem_price(btn("purchaseInventory-gems_200", "2.99", ["icon_btn_gem"])) is None
+
+
 def test_close_button_is_the_x_not_the_panel_holding_it():
     panel = {**btn("content", "Fast Forward Event", ["popup_background_event_9slice", "btn_close_big_idle"]), "w": 250}
     x = {**btn("close", "", ["btn_close_big_idle", "btn_close_big_down"]), "w": 21}

@@ -1,5 +1,3 @@
-import asyncio
-
 from .. import ui
 from ..game import Snapshot
 from . import Task, log
@@ -23,7 +21,8 @@ def missing_ingredients(bot, snap: Snapshot) -> dict[str, int]:
 
 
 class OrdersTask(Task):
-    """Production buildings: start orders when the ingredients are in, use free skips, claim the coins."""
+    """Production buildings: start orders when the ingredients are in, skip timers (free, or with gems
+    when allowed), claim the coins."""
 
     name = "orders"
 
@@ -50,9 +49,9 @@ class OrdersTask(Task):
                     continue
                 return await self.claim(bid, it, o)
             if o["state"] == MAKING:
-                t = o.get("timer") or {}
-                if t and 0 < (t.get("remaining") or 0) <= FREE_SKIP_MS:
-                    return await self.free_skip(bid, it)
+                left = (o.get("timer") or {}).get("remaining") or 0
+                if 0 < left <= FREE_SKIP_MS or (left > 0 and self.cfg.spend_gems):
+                    return await self.skip(bid, it)
                 continue
             if o["state"] in (WAITING, READY) and self.affordable(o["recipe"], snap):
                 return await self.make(bid, it, o)
@@ -77,14 +76,24 @@ class OrdersTask(Task):
             self.bot.stats["orders claimed"] += 1
         return True
 
-    async def free_skip(self, bid, it) -> bool:
-        popup = await self.bot.open_popup(it.cell, "Orders")
+    def skip_button(self, popup) -> dict | None:
+        """The fast-forward button if it's free, or costs gems we're allowed to spend."""
         b = self.bot.button(popup, name="orderFastForward")
-        if b and ui.is_free(b):
-            log.info("free skip at %s", bid)
-            await self.bot.tap_xy(b["x"], b["y"])
-            await self.bot.wait_for(lambda s: any(x["building"] == bid and x["state"] == DONE for x in s.orders), 2)
-        else:
+        if b and (ui.is_free(b) or self.gems_ok(ui.gem_price(b), self.bot.snap)):
+            return b
+        return None
+
+    async def press_skip(self, bid, b) -> bool:
+        if not ui.is_free(b):
+            return await self.pay_gems(b, f"skip order at {bid}")
+        log.info("free skip at %s", bid)
+        await self.bot.tap_xy(b["x"], b["y"])
+        done = await self.bot.wait_for(lambda s: any(x["building"] == bid and x["state"] == DONE for x in s.orders), 2.5)
+        return done is not None
+
+    async def skip(self, bid, it) -> bool:
+        b = self.skip_button(await self.bot.open_popup(it.cell, "Orders"))
+        if b is None or not await self.press_skip(bid, b):
             self.bot.block(f"orders:{bid}", 20)
         await self.bot.close_popups()
         return True
@@ -106,10 +115,9 @@ class OrdersTask(Task):
             self.bot.failed(key, limit=2, seconds=300)
         else:
             self.bot.stats["orders made"] += 1
-            # short recipes can be skipped for free right away
-            b = self.bot.button(started.top_popup, name="orderFastForward")
-            if b and ui.is_free(b):
-                await self.bot.tap_xy(b["x"], b["y"])
-                await asyncio.sleep(0.6)
+            # short recipes can be skipped for free right away (or for gems, when allowed)
+            b = self.skip_button(await self.bot.stable_popup())
+            if b is not None:
+                await self.press_skip(bid, b)
         await self.bot.close_popups()
         return True

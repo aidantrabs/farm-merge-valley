@@ -4,6 +4,7 @@ from types import SimpleNamespace
 
 from fmvbot.config import Config
 from fmvbot.game import Snapshot
+from fmvbot.tasks import Task
 from fmvbot.tasks.board import CollectTask, TidyTask
 from fmvbot.tasks.stickers import StickersTask
 
@@ -18,6 +19,15 @@ def snap(gems=1000, items=()):
 
 def item(id, behaviors, c=1, r=1):
     return {"id": id, "c": c, "r": r, "x": 0, "y": 0, "b": behaviors}
+
+
+def test_gem_skips_respect_the_settings():
+    s = snap(gems=100)
+    assert not Task(bot()).gems_ok(10, s)
+    assert Task(bot(spend_gems=True)).gems_ok(10, s)
+    assert not Task(bot(spend_gems=True)).gems_ok(None, s)
+    assert not Task(bot(spend_gems=True, gem_reserve=95)).gems_ok(10, s)
+    assert not Task(bot(spend_gems=True, max_gems_per_skip=5)).gems_ok(10, s)
 
 
 def test_gem_items_on_the_board_are_only_merged_by_default():

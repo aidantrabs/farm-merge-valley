@@ -8,7 +8,7 @@ tasks = [
   "collect",        # produce, tickets, supply crates on the board
   "harvest",        # grown crops and animals (ingredients that orders need first)
   "clear_depleted", # remove crops/animals with no harvests left
-  "orders",         # start orders, use free skips, claim coins
+  "orders",         # start orders, skip timers (free, or gems with spend_gems), claim coins
   "workers",        # trees, rocks, toolboxes (spends energy)
   "chests",         # open reward chests with keys, upgrade 5 keys -> 2
   "repair",         # fix broken buildings once the materials are on the board
@@ -40,7 +40,13 @@ collect_gems_at_tier = 0     # 0 = never pick up gem items, only merge them
 keep_energy_items = true     # keep energy items as a reserve, use them when energy is low
 energy_low = 10
 
-# Land is bought with coins only. Gems and real money are never spent.
+# Gems from the inventory can skip timers: orders, workers, and the regrowth of crops and animals an
+# open order is waiting for. Real money and ads are never spent.
+spend_gems = false
+gem_reserve = 0              # never go below this many gems
+max_gems_per_skip = 0        # 0 = no limit
+
+# Land is bought with coins only.
 unlock_land = true
 land_coin_reserve = 0
 
