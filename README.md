@@ -150,9 +150,9 @@ the bot work.
 
 ## Known limits
 
-- Built and tested against the standalone (v1.50) and CrazyGames web builds. The Discord build is
-  the same game and code base, and everything is found by name and shape rather than fixed offsets,
-  but if Discord's version renamed something, `fmvbot doctor` will show what couldn't be read.
+- Built and tested against the standalone (v1.50) and CrazyGames web builds, and the Discord build
+  (the same code as CrazyGames build 181). Everything is found by name and shape rather than fixed
+  offsets, but if a new version renames something, `fmvbot doctor` will show what couldn't be read.
 - Visits couldn't be exercised end to end (the web builds have no train station), so that part is
   written defensively: it logs what the train station offers the first time and always returns home.
 - Even with `spend_gems` on, gems only skip timers and buy crates when you run out: the bot doesn't
