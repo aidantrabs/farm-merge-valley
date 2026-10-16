@@ -16,7 +16,7 @@ keeps working in the background while you use your computer.
 
 | Job | Details |
 | --- | --- |
-| Merging | Plans whole merges: gathers 5 identical items into one group (5 make 2, 3 only make 1), moves or pushes other items out of the way, never lets an extra copy join by accident, prefers short drags. Falls back to 3s when the board is full. Coins, gems and energy only ever merge in 5s (3s gain nothing). |
+| Merging | Plans whole merges: gathers 5 identical items into one group (5 make 2, 3 only make 1), swapping other items out of the way (so a full board still works), never lets an extra copy join by accident, prefers short drags. Falls back to 3s when the board is full. Coins, gems and energy only ever merge in 5s (3s gain nothing). |
 | Supply crates | Opens crates while keeping room on the board for harvests and loot; opens more when the crate counter is capped so regeneration isn't wasted. |
 | Harvesting | Taps grown crops and animals when they're ready, ingredients that open orders are waiting for first, then picks up the produce. Clears depleted plants and animals. With `spend_gems` on, skips the regrowth of crops and animals an open order is waiting for. |
 | Orders | Starts each building's order once the ingredients are in, takes the free skip on short timers (or skips any timer with gems when `spend_gems` is on), claims the coins. |

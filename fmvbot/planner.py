@@ -5,8 +5,8 @@ Game rules this relies on (checked against the live game):
   4-connected group of identical items under the drop point
 - 3 items make 1 of the next tier, 5 make 2; bigger groups are split into 5s and 3s
 - dropping an item onto an empty cell only moves it
-- dropping an item onto a different, displaceable item takes its cell and pushes
-  that item to a nearby empty cell
+- dropping an item onto a different, displaceable item swaps the two, so a full board
+  can still be rearranged
 """
 
 from dataclasses import dataclass, field
@@ -102,7 +102,7 @@ def plan_group(
     """Plan moves so exactly k copies of item_id end up merged.
 
     cells: where the movable copies are.  free: empty cells.  pushable: cells holding
-    other items that may be pushed aside.  allow_oversize: if a group is bigger than k
+    other items that may be swapped out of the way.  allow_oversize: if a group is bigger than k
     and can't be trimmed, merge it whole.  frozen: copies that must not be merged
     (and so must not touch the group).
     """
@@ -138,15 +138,13 @@ def _plan_from_anchor(item_id, cells, anchor, k, free, pushable, max_moves, froz
         moves.append(Move(src, dst, displace=displace))
         cells.discard(src)
         cells.add(dst)
-        free.add(src)
         if displace:
-            # the pushed item lands on the nearest empty cell
+            # the other item swaps into the cell we came from
             pushable.discard(dst)
-            landing = min(free - {src}, key=lambda f: _dist(f, dst), default=src)
-            free.discard(landing)
-            pushable.add(landing)
+            pushable.add(src)
         else:
             free.discard(dst)
+            free.add(src)
 
     # too big: peel items off the edge until k remain
     while len(group) > k:
@@ -154,14 +152,18 @@ def _plan_from_anchor(item_id, cells, anchor, k, free, pushable, max_moves, froz
         for g in sorted(group, key=lambda g: (sum(n in group for n in neighbours(g)), g)):
             if not _stays_connected(group, g):
                 continue
-            spots = [f for f in free if safe_spot(f, set()) and f not in neighbours(g)]
-            if spots:
-                peel = (g, min(spots, key=lambda f: (_dist(f, g), f)))
+            # an empty cell if there is one, otherwise swap with something out of the way
+            for pool, displace in ((free, False), (pushable, True)):
+                spots = [f for f in pool if safe_spot(f, set()) and f not in neighbours(g)]
+                if spots:
+                    peel = (g, min(spots, key=lambda f: (_dist(f, g), f)), displace)
+                    break
+            if peel:
                 break
         if peel is None:
             return None
-        g, spot = peel
-        occupy(g, spot, displace=False)
+        g, spot, displace = peel
+        occupy(g, spot, displace)
         group.discard(g)
         if len(moves) > max_moves:
             return None
@@ -186,12 +188,10 @@ def _plan_from_anchor(item_id, cells, anchor, k, free, pushable, max_moves, froz
             if empty_spots:
                 choice = (src, min(empty_spots, key=lambda f: (_dist(f, src), f)), False)
                 break
-            # needs somewhere for the pushed item to go
-            if len(free) >= 1:
-                push_spots = [f for f in border & pushable if safe_spot(f, joining)]
-                if push_spots:
-                    choice = (src, min(push_spots, key=lambda f: (_dist(f, src), f)), True)
-                    break
+            swap_spots = [f for f in border & pushable if safe_spot(f, joining)]
+            if swap_spots:
+                choice = (src, min(swap_spots, key=lambda f: (_dist(f, src), f)), True)
+                break
         if choice is None:
             return None
         src, dst, displace = choice

@@ -22,17 +22,16 @@ def simulate(items, free, plan, others=()):
         assert not m.merge
         assert m.src in items
         if m.displace:
-            assert m.dst in others and free
+            # the other item swaps into the cell the dragged one came from
+            assert m.dst in others
             others.remove(m.dst)
-            landing = min(free, key=lambda f: abs(f[0] - m.dst[0]) + abs(f[1] - m.dst[1]))
-            free.remove(landing)
-            others.add(landing)
+            others.add(m.src)
         else:
             assert m.dst in free
             free.remove(m.dst)
+            free.add(m.src)
         items.remove(m.src)
         items.add(m.dst)
-        free.add(m.src)
     last = plan.moves[-1]
     assert last.merge and last.src in items and last.dst in items
     items.remove(last.src)
@@ -122,9 +121,19 @@ def test_crowded_board_pushes_other_items_aside():
     assert simulate(items, free, plan, others) == 3
 
 
-def test_no_pushing_without_somewhere_for_it_to_go():
+def test_full_board_still_merges_by_swapping():
     items, free, others = board(["AoA", "ooo", "Aoo"], with_others=True)
-    assert plan_group("x", items, 3, free, pushable=others) is None
+    assert not free
+    plan = plan_group("x", items, 3, free, pushable=others)
+    assert plan is not None
+    assert simulate(items, free, plan, others) == 3
+
+
+def test_full_board_trims_an_oversize_group_by_swapping():
+    items, free, others = board(["AAAA", "oooo", "oooo"], with_others=True)
+    plan = plan_group("x", items, 3, free, pushable=others)
+    assert plan is not None and plan.size == 3
+    assert simulate(items, free, plan, others) == 3
 
 
 def test_oversize_group_merges_whole_when_it_cannot_be_trimmed():

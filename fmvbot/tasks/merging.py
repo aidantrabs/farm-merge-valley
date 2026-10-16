@@ -29,7 +29,7 @@ class MergeTask(Task):
         hidden: dict[str, set] = defaultdict(set)
         pushable = set()
         for it in snap.items:
-            if it.movable and it.has("displaceable") and not it.busy and it.ext == (1, 1):
+            if it.movable and it.has("displaceable") and not it.busy and it.ext == (1, 1) and self.bot.reachable(it.cell):
                 pushable.add(it.cell)
             if not self.bp.mergeable(it.id):
                 continue
@@ -93,7 +93,10 @@ class MergeTask(Task):
                 return
             count = len(snap.by_id(plan.item_id))
             if not await bot.drag_cells(mv.src, mv.dst):
-                bot.failed(key, limit=2, seconds=180)
+                # plan around these two cells for a while before giving up on the item
+                for cell in (mv.src, mv.dst):
+                    bot.block(f"covered:{cell}", 60)
+                bot.failed(key, limit=3, seconds=180)
                 return
             if mv.merge:
                 # every merge eats at least three; leftovers of odd-sized groups stay behind

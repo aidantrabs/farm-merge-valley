@@ -312,16 +312,17 @@ class Bot:
 
     async def drag_cells(self, src: Cell, dst: Cell) -> bool:
         await self.settle(1.0)
+        # picking up needs the item itself; the drop only goes by the tile under the pointer
         a = await self._point(src, refocus=False)
-        b = await self._point(dst, refocus=False)
+        b = await self._point(dst, refocus=False, pick=False)
         if a is None or b is None:
-            if not self.reachable(src) or not self.reachable(dst):
+            if not self.reachable(src):
                 return False
             mid = ((src[0] + dst[0]) // 2, (src[1] + dst[1]) // 2)
             await self.s.focus_cell(*mid)
             await self.settle()
             a = await self._point(src, refocus=False)
-            b = await self._point(dst, refocus=False)
+            b = await self._point(dst, refocus=False, pick=False)
         if a is None or b is None:
             log.debug("cannot see both %s and %s", src, dst)
             return False
