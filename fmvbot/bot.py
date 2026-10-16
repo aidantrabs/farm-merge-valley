@@ -244,6 +244,9 @@ class Bot:
                 await self.settle()
             if pick:
                 p = await self.s.pick_point(*cell)
+                if p and not self.snap.clickable_point(p["x"], p["y"]):
+                    # off screen: the game hides what the camera can't see, so it can't be picked yet
+                    continue
                 if p and p.get("ok") is False and p.get("popout") and await self.dismiss_popouts():
                     p = await self.s.pick_point(*cell)
                 if p and p.get("ok") is False:
