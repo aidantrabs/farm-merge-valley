@@ -337,6 +337,40 @@
     }));
   }
 
+  // the stage child holding every navigation layer (map, HUD, popups...)
+  function layerRoot() {
+    let o = tryOr(() => A.g.navigation.popupLayer.container, null);
+    while (o && o.parent && o.parent !== A.g.canvas.stage) o = o.parent;
+    return o;
+  }
+
+  // views the game adds straight onto the stage, above every layer (the sticker book and its
+  // pack opening); the popup layer never sees them and they swallow every tap
+  function overlays(G) {
+    const root = layerRoot();
+    return A.g.canvas.stage.children.filter((o) => o !== root && o.visible && o.worldAlpha > 0.05 && o.children && o.children.length).map((o) => ({
+      id: o.__fmvId || (o.__fmvId = ++popupSeq),
+      name: o._name || o.name || o.constructor.name,
+      ui: uiTree(o, G, 20),
+      texts: textNodes(o, G),
+    }));
+  }
+
+  // visible labels and where they are; prompts like "Tap to skip" aren't buttons themselves
+  function textNodes(root, G) {
+    const out = [];
+    const walk = (o, d) => {
+      if (!o.visible || o.worldAlpha < 0.05 || d > 20) return;
+      if (typeof o.text === 'string' && o.text.trim()) {
+        const b = boundsCss(o, G);
+        if (b.w > 0 && b.h > 0) out.push({ text: o.text.replace(/\s+/g, ' ').trim().slice(0, 60), ...b });
+      }
+      if (o.children) for (const c of o.children) walk(c, d + 1);
+    };
+    walk(root, 0);
+    return out.slice(0, 80);
+  }
+
   function textOf(o, depth) {
     if (depth < 0 || !o.visible) return '';
     let t = typeof o.text === 'string' ? o.text : '';
@@ -401,7 +435,7 @@
 
   function hud(G) {
     const out = {};
-    const stack = [A.g.canvas.stage];
+    const stack = [layerRoot() || A.g.canvas.stage];
     while (stack.length) {
       const o = stack.pop();
       if (o === A.sceneObj) continue;
@@ -458,6 +492,7 @@
       focused: tryOr(() => val(A.g.pageVisibility, 'isFocused'), null),
       popups: popups(G),
       popupOpen: !!tryOr(() => A.g.navigation.isAnyPopupOpen(), false),
+      overlays: overlays(G),
       unclaimedDiscoveries: tryOr(() => A.g.discovery.getUnclaimedItems().length, 0),
       hud: hud(G),
     };

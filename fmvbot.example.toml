@@ -2,6 +2,7 @@
 
 # Jobs in priority order. Remove a name to turn that job off.
 tasks = [
+  "stickers",       # sticker book: skip pack reveals, collect, close it (it covers everything)
   "tutorial",       # follow the onboarding for new farms
   "popups",         # claim rewards, dismiss everything else (never buys anything)
   "collect",        # produce, tickets, supply crates on the board

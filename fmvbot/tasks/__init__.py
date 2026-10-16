@@ -29,6 +29,7 @@ def build_tasks(bot, names: list[str]) -> list[Task]:
     from .popups import PopupTask
     from .progress import CardsTask, LandTask, RepairTask
     from .rewards import RewardsTask, VisitsTask
+    from .stickers import StickersTask
     from .tutorial import TutorialTask
     from .workers import WorkersTask
 
@@ -36,6 +37,7 @@ def build_tasks(bot, names: list[str]) -> list[Task]:
         t.name: t
         for t in (
             PopupTask,
+            StickersTask,
             TutorialTask,
             CollectTask,
             HarvestTask,

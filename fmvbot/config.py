@@ -11,6 +11,7 @@ class Config:
     # merge and crates always find work, so everything occasional goes before them.
     tasks: list[str] = field(
         default_factory=lambda: [
+            "stickers",
             "tutorial",
             "popups",
             "collect",

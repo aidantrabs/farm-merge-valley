@@ -28,6 +28,7 @@ keeps working in the background while you use your computer.
 | Visits | Spends train tickets visiting farms, helps out there (train, shop, tree, animal, crop) and comes home. |
 | Tutorial | Plays the onboarding on a brand-new farm by doing exactly what the tutorial asks for. |
 | Upgrade cards | Uses them on their crop or animal. |
+| Sticker packs | The sticker book (collector cards) opens over the whole game when packs arrive: presses "skip" on each reveal, collects the stickers and closes the book. |
 
 Safety rails:
 

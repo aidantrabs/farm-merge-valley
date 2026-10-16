@@ -94,6 +94,9 @@ class Bot:
     async def tick(self, snap: Snapshot) -> bool:
         # on someone else's farm only popups and the visit itself make sense
         tasks = [t for t in self.tasks if t.name in ("popups", "visits")] if snap.visiting else self.tasks
+        if snap.overlays:
+            # the sticker book covers everything; nothing else can be pressed until it's gone
+            tasks = [t for t in self.tasks if t.name == "stickers"]
         for task in tasks:
             if self.blocked(f"task:{task.name}"):
                 continue

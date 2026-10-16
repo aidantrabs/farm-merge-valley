@@ -60,6 +60,7 @@ class Snapshot:
         self.level: int = raw.get("level") or 0
         self.popups: list[dict] = raw.get("popups") or []
         self.popup_open: bool = bool(raw.get("popupOpen"))
+        self.overlays: list[dict] = raw.get("overlays") or []
         self.hud: dict = raw.get("hud") or {}
         self.scene: str | None = raw.get("scene")
         self.camera: dict | None = raw.get("camera")
