@@ -19,7 +19,7 @@ tasks = [
   "visits",         # spend train tickets visiting farms (Discord/Facebook only)
   "cards",          # use upgrade cards
   "merge_coins",    # merge coins
-  "crates",         # open supply crates while there is room
+  "crates",         # open supply crates while there is room (buys more with gems when out, with spend_gems)
   "tidy",           # bank cheap coins (and gems, if collected) when the board is jammed
 ]
 
@@ -42,11 +42,11 @@ collect_gems_at_tier = 0     # 0 = never pick up gem items, only merge them
 keep_energy_items = true     # keep energy items as a reserve, use them when energy is low
 energy_low = 10
 
-# Gems from the inventory can skip timers: orders, workers, and the regrowth of crops and animals an
-# open order is waiting for. Real money and ads are never spent.
+# Gems from the inventory can skip timers (orders, workers, and the regrowth of crops and animals an
+# open order is waiting for) and buy crates when you run out. Real money and ads are never spent.
 spend_gems = false
 gem_reserve = 0              # never go below this many gems
-max_gems_per_skip = 0        # 0 = no limit
+max_gems_per_skip = 0        # most gems for any one skip or purchase; 0 = no limit
 
 # Land is bought with coins only.
 unlock_land = true

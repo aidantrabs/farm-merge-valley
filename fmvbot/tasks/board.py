@@ -1,5 +1,7 @@
 import asyncio
+import re
 
+from .. import ui
 from ..game import Item, Snapshot
 from . import Task, log
 from .orders import missing_ingredients
@@ -169,9 +171,11 @@ class CratesTask(Task):
         # at the cap every crate not opened is one lost, so dig deeper into the reserve
         reserve = self.cfg.reserve_free_cells if crates < CRATE_CAP else self.cfg.min_free_cells + 1
         room = len(snap.empty) - reserve
-        if not btn or crates <= 0 or room <= 0 or self.bot.blocked("crates"):
-            return False
         if snap.popups or snap.tutorial.get("blockTaps"):
+            return False
+        if crates <= 0 and room > 0 and self.cfg.spend_gems and not self.bot.blocked("crates:buy"):
+            return await self.buy(snap)
+        if not btn or crates <= 0 or room <= 0 or self.bot.blocked("crates"):
             return False
         n = min(self.cfg.crate_burst, room, crates)
         log.info("open %d crate%s (%d left, %d free cells)", n, "s" * (n > 1), crates, len(snap.empty))
@@ -188,6 +192,43 @@ class CratesTask(Task):
             self.bot.stats["crates"] += crates - after.amount("crates")
         await asyncio.sleep(0.4)
         return True
+
+    async def buy(self, snap) -> bool:
+        """Out of crates: buy the pack with the most crates per gem that the gem settings allow."""
+        bot = self.bot
+        bot.block("crates:buy", 600)
+        market = snap.hud.get("marketplace")
+        if market is None:
+            return False
+        await bot.tap_xy(market["x"], market["y"])
+        if await bot.wait_for(lambda s: s.popups and "MarketPlace" in s.top_popup["name"], 3) is None:
+            return True
+        for _ in range(8):
+            p = await bot.stable_popup()
+            if not p or "MarketPlace" not in p["name"]:
+                break
+            packs = [(b, int(m.group(1)), ui.gem_price(b)) for b in p["ui"] if (m := CRATE_PACK.match(b["name"] or ""))]
+            packs = [(b, n, price) for b, n, price in packs if self.gems_ok(price, bot.snap)]
+            if not packs:
+                log.info("no crate pack within the gem settings")
+                break
+            b, n, price = max(packs, key=lambda t: (t[1] / t[2], t[1]))
+            v = bot.snap.view
+            if bot.snap.on_screen(b["x"], b["y"], margin=24):
+                before = bot.snap.amount("crates")
+                if await self.pay_gems(b, f"buy {n} crates") or bot.snap.amount("crates") > before:
+                    bot.stats["crates bought"] += n
+                break
+            # the packs sit further down the shop: scroll the list towards them
+            x, mid = v["l"] + v["w"] / 2, v["t"] + v["h"] / 2
+            step = v["h"] * 0.3 * (1 if b["y"] > mid else -1)
+            await bot.drag_xy(x, mid + step / 2, x, mid - step / 2)
+            await asyncio.sleep(0.6)
+        await bot.close_popups()
+        return True
+
+
+CRATE_PACK = re.compile(r"^purchaseInventory-crates_(\d+)$")
 
 
 class TidyTask(Task):

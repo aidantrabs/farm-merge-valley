@@ -17,7 +17,7 @@ keeps working in the background while you use your computer.
 | Job | Details |
 | --- | --- |
 | Merging | Comes first: everything on the board that can merge is merged before orders, coins after orders. Plans whole merges: gathers 5 identical items into one group (5 make 2, 3 only make 1), swapping other items out of the way (so a full board still works), never lets an extra copy join by accident, prefers short drags. Falls back to 3s when the board is full. Coins, gems and energy only ever merge in 5s (3s gain nothing). Upgrade cards only merge with cards for the same crop or animal. |
-| Supply crates | Opens crates while keeping room on the board for harvests and loot; opens more when the crate counter is capped so regeneration isn't wasted. |
+| Supply crates | Opens crates while keeping room on the board for harvests and loot; opens more when the crate counter is capped so regeneration isn't wasted. When you run out, buys the best-value crate pack with gems (only with `spend_gems`). |
 | Harvesting | Taps grown crops and animals when they're ready, ingredients that open orders are waiting for first, then picks up the produce. Clears depleted plants and animals. With `spend_gems` on, skips the regrowth of crops and animals an open order is waiting for. |
 | Orders | Starts each building's order once the ingredients are in, takes the free skip on short timers (or skips any timer with gems when `spend_gems` is on), claims the coins. One order per building per round: merge everything, orders, coins, crates, repeat. |
 | Workers | Sends workers to toolboxes, trees and rocks (toolboxes first, then whatever pending repairs need, cheapest step first), uses free skips (gem skips with `spend_gems`), collects the wood, stone and tools. One job per worker per round. |
@@ -32,9 +32,10 @@ keeps working in the background while you use your computer.
 
 Safety rails:
 
-- Never spends real money or watches ads. Gems are only spent on skipping timers, and only when you
-  turn `spend_gems` on (with an optional `gem_reserve` and `max_gems_per_skip`); gem items lying on
-  the board are only ever merged, never picked up (`collect_gems_at_tier = 0`).
+- Never spends real money or watches ads. Gems are only spent on skipping timers and on crates when
+  you run out, and only when you turn `spend_gems` on (with an optional `gem_reserve` and
+  `max_gems_per_skip`); gem items lying on the board are only ever merged, never picked up
+  (`collect_gems_at_tier = 0`).
 - Never clicks outside the game itself, so Discord or the website around it are safe.
 - Never presses sign-in, invite or share buttons.
 - Doesn't change game data: everything happens through clicks and drags. The only thing it adjusts
@@ -108,7 +109,8 @@ example file lists every setting with its default and what it does. The most use
 - `tasks`: the jobs and their priority; remove one to turn it off (e.g. drop `"land"` to save coins).
 - `prefer_merge5`, `merge3_when_free_below`: how patient merging is.
 - `reserve_free_cells`: how much empty board to keep.
-- `spend_gems`, `gem_reserve`, `max_gems_per_skip`: let the bot skip order, worker and regrowth timers with gems.
+- `spend_gems`, `gem_reserve`, `max_gems_per_skip`: let the bot skip order, worker and regrowth timers
+  with gems, and buy crates when you run out.
 - `use_energy_on`, `energy_reserve`: where energy goes.
 - `speed`, `max_actions_per_minute`, `break_every_minutes`: pacing.
 
@@ -153,5 +155,5 @@ the bot work.
   but if Discord's version renamed something, `fmvbot doctor` will show what couldn't be read.
 - Visits couldn't be exercised end to end (the web builds have no train station), so that part is
   written defensively: it logs what the train station offers the first time and always returns home.
-- Even with `spend_gems` on, gems only skip timers: the bot doesn't buy extra workers, premium land,
-  energy, crates or sticker vault rewards with them.
+- Even with `spend_gems` on, gems only skip timers and buy crates when you run out: the bot doesn't
+  buy extra workers, premium land, energy or sticker vault rewards with them.
