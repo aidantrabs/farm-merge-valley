@@ -34,6 +34,11 @@ class Item:
         return any(n in self.behaviors for n in names)
 
     @property
+    def merge_key(self) -> str:
+        """What it merges with: usually its id, but upgrade cards only merge with cards for the same crop."""
+        return (self.data.get("mergeable") or {}).get("targetSpecification") or self.id
+
+    @property
     def movable(self) -> bool:
         return "movable" in self.behaviors
 
@@ -109,6 +114,9 @@ class Snapshot:
 
     def by_id(self, item_id: str) -> list[Item]:
         return [it for it in self.items if it.id == item_id]
+
+    def by_key(self, key: str) -> list[Item]:
+        return [it for it in self.items if it.merge_key == key]
 
     def with_behavior(self, *names: str) -> list[Item]:
         return [it for it in self.items if it.has(*names)]
